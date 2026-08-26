@@ -1,0 +1,2492 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>An EAT Profile for Composite Platform Attestation</title>
+<meta content="Xiling Sun" name="author">
+<meta content="Raghu Krishnamurthy" name="author">
+<meta content="Roksana Golizadeh Mojarad" name="author">
+<meta content="
+       This document defines an Entity Attestation Token (EAT) profile for
+composite platform attestation. A Lead Attester, such as a platform Root
+of Trust, produces a single signed composite EAT that carries its own
+measurements and cryptographic digests committing to detached, native
+evidence collected from peripheral sub-attesters. The full sub-attester
+evidence -- Security Protocol and Data Model (SPDM) signed measurements,
+device-emitted EATs, or
+SPDM-carried TCG DICE Concise Evidence -- is conveyed verbatim as
+detached Claims-Sets in a Detached EAT Bundle. This yields a single,
+freshness-bound, platform-scoped attestation artifact that a Verifier
+can appraise against platform-composition endorsements, even when the
+evidence is collected and conveyed by an untrusted mediator. 
+    " name="description">
+<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="attestation" name="keyword">
+<meta content="EAT" name="keyword">
+<meta content="CoRIM" name="keyword">
+<meta content="SPDM" name="keyword">
+<meta content="composite device" name="keyword">
+<meta content="platform attestation" name="keyword">
+<meta content="draft-sun-rats-composite-eat-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.34.0
+    Python 3.14.7
+    ConfigArgParse 1.7.5
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.11.3
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.8.2
+-->
+<link href="draft-sun-rats-composite-eat.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
+}
+svg {
+  display: block;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
+}
+.alignCenter {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+      float: none;
+    }
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a {
+  text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
+}
+.iref + a[href].internal {
+  color: var(--text-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
+  }
+  @media print {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+  & .prepared {
+    float: right;
+  }
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
+  }
+}
+
+/* Comments */
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
+      }
+    }
+    & a.toplink {
+      float: right;
+    }
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
+    }
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc {
+    page-break-before: always;
+    border-top: none;
+    padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Composite Platform Attestation</td>
+<td class="right">August 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Sun, et al.</td>
+<td class="center">Expires 27 February 2027</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Remote ATtestation ProcedureS</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-sun-rats-composite-eat-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-08-26" class="published">26 August 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2027-02-27">27 February 2027</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">X. Sun</div>
+<div class="org">Microsoft</div>
+</div>
+<div class="author">
+      <div class="author-name">R. Krishnamurthy</div>
+<div class="org">NVIDIA</div>
+</div>
+<div class="author">
+      <div class="author-name">R. Golizadeh Mojarad</div>
+<div class="org">Microsoft</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">An EAT Profile for Composite Platform Attestation</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document defines an Entity Attestation Token (EAT) profile for
+composite platform attestation. A Lead Attester, such as a platform Root
+of Trust, produces a single signed composite EAT that carries its own
+measurements and cryptographic digests committing to detached, native
+evidence collected from peripheral sub-attesters. The full sub-attester
+evidence -- Security Protocol and Data Model (SPDM) signed measurements,
+device-emitted EATs, or
+SPDM-carried TCG DICE Concise Evidence -- is conveyed verbatim as
+detached Claims-Sets in a Detached EAT Bundle. This yields a single,
+freshness-bound, platform-scoped attestation artifact that a Verifier
+can appraise against platform-composition endorsements, even when the
+evidence is collected and conveyed by an untrusted mediator.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-sun-rats-composite-eat/">https://datatracker.ietf.org/doc/draft-sun-rats-composite-eat/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        Remote ATtestation ProcedureS Working Group mailing list (<span><a href="mailto:rats@ietf.org">mailto:rats@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/rats/">https://mailarchive.ietf.org/arch/browse/rats/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/rats/">https://www.ietf.org/mailman/listinfo/rats/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/helloxiling/draft-sun-rats-composite-eat">https://github.com/helloxiling/draft-sun-rats-composite-eat</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 27 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-problem-statement" class="internal xref">Problem Statement</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2" class="auto internal xref">1.2</a>.  <a href="#name-approach" class="internal xref">Approach</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.3">
+                <p id="section-toc.1-1.1.2.3.1" class="keepWithNext"><a href="#section-1.3" class="auto internal xref">1.3</a>.  <a href="#name-relationship-to-other-rats-" class="internal xref">Relationship to Other RATS Work</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.4">
+                <p id="section-toc.1-1.1.2.4.1"><a href="#section-1.4" class="auto internal xref">1.4</a>.  <a href="#name-scope" class="internal xref">Scope</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-terminology" class="internal xref">Conventions and Terminology</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-architecture-and-trust-mode" class="internal xref">Architecture and Trust Model</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-composite-device-realizatio" class="internal xref">Composite Device Realization</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-untrusted-collector-and-con" class="internal xref">Untrusted Collector and Conveyance</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-role-mapping" class="internal xref">Role Mapping</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-the-signed-composite-eat" class="internal xref">The Signed Composite EAT</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-profile-conformance" class="internal xref">Profile Conformance</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-bundle-structure" class="internal xref">Bundle Structure</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-top-level-claims" class="internal xref">Top-Level Claims</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-lead-attester-self-measurem" class="internal xref">Lead Attester Self-Measurements</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-detached-sub-attester-evide" class="internal xref">Detached Sub-Attester Evidence</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-detached-submodule-digest-b" class="internal xref">Detached-Submodule-Digest Binding</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-deterministic-encoding-and-" class="internal xref">Deterministic Encoding and Digest Rules</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-native-evidence-carriage" class="internal xref">Native Evidence Carriage</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3.2.1">
+                    <p id="section-toc.1-1.5.2.3.2.1.1"><a href="#section-5.3.1" class="auto internal xref">5.3.1</a>.  <a href="#name-spdm-signed-measurements" class="internal xref">SPDM Signed Measurements</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3.2.2">
+                    <p id="section-toc.1-1.5.2.3.2.2.1"><a href="#section-5.3.2" class="auto internal xref">5.3.2</a>.  <a href="#name-device-emitted-eat" class="internal xref">Device-Emitted EAT</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3.2.3">
+                    <p id="section-toc.1-1.5.2.3.2.3.1"><a href="#section-5.3.3" class="auto internal xref">5.3.3</a>.  <a href="#name-spdm-carried-tcg-dice-conci" class="internal xref">SPDM-Carried TCG DICE Concise Evidence</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3.2.4">
+                    <p id="section-toc.1-1.5.2.3.2.4.1"><a href="#section-5.3.4" class="auto internal xref">5.3.4</a>.  <a href="#name-relationship-to-conceptual-" class="internal xref">Relationship to Conceptual Message Wrappers</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-target-environment-identifi" class="internal xref">Target Environment Identifier</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-verification-informative" class="internal xref">Verification (Informative)</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-untrusted-collector-threat-" class="internal xref">Untrusted Collector Threat Model</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-provenance-preservation" class="internal xref">Provenance Preservation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-aggregator-self-attestation" class="internal xref">Aggregator Self-Attestation and Key Handling</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-resource-exhaustion" class="internal xref">Resource Exhaustion</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-privacy-considerations" class="internal xref">Privacy Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-native-evidence-cwt-claim" class="internal xref">Native Evidence CWT Claim</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-platform-corim-locator-cwt-" class="internal xref">Platform CoRIM Locator CWT Claim</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
+                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-eat-profile-identifier" class="internal xref">EAT Profile Identifier</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-worked-example" class="internal xref">Worked Example</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-collected-cddl" class="internal xref">Collected CDDL</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<div id="problem-statement">
+<section id="section-1.1">
+        <h3 id="name-problem-statement">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-problem-statement" class="section-name selfRef">Problem Statement</a>
+        </h3>
+<p id="section-1.1-1">Platform attestation today is disaggregated. Where per-device evidence
+is retrievable (for example, over a Redfish-based interface), attesting a
+whole server takes N separate transactions returning N independently
+signed responses, and the Verifier must reconstruct platform topology
+from those separate per-device results. There is no signed,
+platform-level artifact that binds a single Verifier nonce, the platform
+Root of Trust (RoT) state, and the set of device evidence reported for
+the platform.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">Three gaps follow:<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1.1-3">
+<li id="section-1.1-3.1">
+            <p id="section-1.1-3.1.1">No aggregate. There is no single signed platform-scoped artifact; the
+Verifier reassembles the platform from independent per-device results.<a href="#section-1.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-1.1-3.2">
+            <p id="section-1.1-3.2.1">No uniform claim. Devices variously expose SPDM signed measurements,
+emit their own signed EAT, or carry TCG DICE Concise Evidence inside
+SPDM measurements. No common platform structure carries these forms
+together without rewriting device evidence.<a href="#section-1.1-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-1.1-3.3">
+            <p id="section-1.1-3.3.1">Heavier RoT firmware footprint. Attesting the platform RoT under the
+same per-device model would force a full SPDM responder path onto the
+RoT solely to attest itself.<a href="#section-1.1-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
+<div id="approach">
+<section id="section-1.2">
+        <h3 id="name-approach">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-approach" class="section-name selfRef">Approach</a>
+        </h3>
+<p id="section-1.2-1">A Lead Attester (<span><a href="https://rfc-editor.org/rfc/rfc9334#section-3.3" class="relref">Section 3.3</a> of [<a href="#RFC9334" class="cite xref">RFC9334</a>]</span> composite device pattern)
+produces one signed composite EAT. The composite EAT carries the Lead
+Attester's own measurements and, for each peripheral sub-attester, a
+detached-submodule digest that commits to the sub-attester's evidence.
+The evidence itself is preserved in its native encoding and conveyed
+separately as a detached Claims-Set within a Detached EAT Bundle (CBOR
+tag 602, <span>[<a href="#RFC9711" class="cite xref">RFC9711</a>]</span>). The signed digests bind the detached evidence;
+the native bytes preserve each device's own end-to-end signature.<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="relationship-to-other-rats-work">
+<section id="section-1.3">
+        <h3 id="name-relationship-to-other-rats-">
+<a href="#section-1.3" class="section-number selfRef">1.3. </a><a href="#name-relationship-to-other-rats-" class="section-name selfRef">Relationship to Other RATS Work</a>
+        </h3>
+<p id="section-1.3-1"><span>[<a href="#I-D.poirier-rats-eat-da" class="cite xref">I-D.poirier-rats-eat-da</a>]</span> defines an EAT profile for per-device
+attestation evidence in confidential-computing device assignment, and
+notes that such a device token is "typically enclosed in a wider
+platform specific attestation token." This document defines that
+enclosing, signed, self-attesting composite envelope for the
+platform/operator use case. A device token of that form <span class="bcp14">MAY</span> be carried
+as one detached sub-attester payload (<a href="#native-evidence" class="auto internal xref">Section 5.3</a>); the two
+profiles address different consumers and are complementary.<a href="#section-1.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="scope">
+<section id="section-1.4">
+        <h3 id="name-scope">
+<a href="#section-1.4" class="section-number selfRef">1.4. </a><a href="#name-scope" class="section-name selfRef">Scope</a>
+        </h3>
+<p id="section-1.4-1">This document specifies the composite EAT evidence format: the signed
+composite token, the detached sub-attester evidence carriage, and the
+binding between them. Appraisal of the composite against a platform
+composition endorsement (for example, a platform CoRIM profile) is
+summarized informatively in <a href="#verification" class="auto internal xref">Section 6</a> and specified separately.
+Tenant-side attestation and TDISP composition are outside the scope of
+this document. Physical slot locality and bus-level anti-relay guarantees are
+also outside scope; this profile supports identity-based anti-substitution.
+Trust-anchor enrollment, endorsement authoring, and transport/collection APIs
+are also outside scope.<a href="#section-1.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="conventions-and-terminology">
+<section id="section-2">
+      <h2 id="name-conventions-and-terminology">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-terminology" class="section-name selfRef">Conventions and Terminology</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">Data structures are defined using the Concise Data Definition Language
+(CDDL) <span>[<a href="#RFC8610" class="cite xref">RFC8610</a>]</span>.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-3">This document uses the terms Attester, Verifier, Relying Party, Endorser,
+Reference Value Provider, Lead Attester, Sub-Attester, Composite Device,
+Target Environment, and Attesting Environment as defined in <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<p id="section-2-4">Additional terms:<a href="#section-2-4" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-2-5">
+        <dt id="section-2-5.1">Detached Claims-Set:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-5.2">
+          <p id="section-2-5.2.1">The native sub-attester evidence for one Target Environment, encoded as
+a CBOR Claims-Set and conveyed in the detached slot of the Detached EAT
+Bundle, committed to by a digest in the signed composite EAT.<a href="#section-2-5.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-5.3">Target Environment Identifier:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-5.4">
+          <p id="section-2-5.4.1">A stable, operator-owned topology label (rendered as an <code>env.*</code> string)
+used as the map key for a sub-attester in both the signed <code>submods</code>
+claim and the detached Claims-Set map.<a href="#section-2-5.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-5.5">Untrusted Collector:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-5.6">
+          <p id="section-2-5.6.1">The entity that discovers sub-attesters, collects evidence, and
+assembles the bundle. It is not trusted for content: it <span class="bcp14">MAY</span> drop,
+reorder, or mislabel evidence, but <span class="bcp14">MUST NOT</span> be able to forge it.<a href="#section-2-5.6.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="architecture-and-trust-model">
+<section id="section-3">
+      <h2 id="name-architecture-and-trust-mode">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-architecture-and-trust-mode" class="section-name selfRef">Architecture and Trust Model</a>
+      </h2>
+<div id="composite-device-realization">
+<section id="section-3.1">
+        <h3 id="name-composite-device-realizatio">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-composite-device-realizatio" class="section-name selfRef">Composite Device Realization</a>
+        </h3>
+<p id="section-3.1-1">This profile realizes the <span><a href="https://rfc-editor.org/rfc/rfc9334#section-3.3" class="relref">Section 3.3</a> of [<a href="#RFC9334" class="cite xref">RFC9334</a>]</span> composite device
+pattern. The Lead Attester signs the composite EAT and contributes its
+own Attesting-Environment identity and measurements. Peripheral devices
+are Sub-Attesters whose evidence appears only as detached-submodule
+digests in the signed token, with the full evidence detached.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2">The Lead Attester does not appear as a submodule; its claims are
+top-level claims of the composite EAT.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.1-3">This profile does not replace native Sub-Attester verification. A Verifier
+<span class="bcp14">MUST</span> validate each Sub-Attester signature or other native evidence protection
+in addition to validating the composite EAT signature.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="untrusted-collector-and-conveyance">
+<section id="section-3.2">
+        <h3 id="name-untrusted-collector-and-con">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-untrusted-collector-and-con" class="section-name selfRef">Untrusted Collector and Conveyance</a>
+        </h3>
+<p id="section-3.2-1">The entity that collects sub-attester evidence and assembles the bundle
+is untrusted for content. Its labels and completeness are not proven by
+the composite signature; they are appraisal inputs. The design goal is
+that a misbehaving collector can cause detectable failures (missing or
+mismatched digests, failed device signatures) but cannot forge evidence
+or the composite signature. See <a href="#security" class="auto internal xref">Section 7</a>.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="role-mapping">
+<section id="section-3.3">
+        <h3 id="name-role-mapping">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-role-mapping" class="section-name selfRef">Role Mapping</a>
+        </h3>
+<span id="name-rats-role-mapping"></span><table class="center" id="table-1">
+          <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-rats-role-mapping" class="selfRef">RATS role mapping</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Component</th>
+              <th class="text-left" rowspan="1" colspan="1">RFC 9334 role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Lead Attester (e.g. platform RoT)</td>
+              <td class="text-left" rowspan="1" colspan="1">Lead Attester</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Peripheral device</td>
+              <td class="text-left" rowspan="1" colspan="1">Sub-Attester</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Collector / conveyance</td>
+              <td class="text-left" rowspan="1" colspan="1">Evidence collection / conveyance</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Endorser / RVP</td>
+              <td class="text-left" rowspan="1" colspan="1">Endorser / Reference Value Provider</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Verifier</td>
+              <td class="text-left" rowspan="1" colspan="1">Verifier</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Consumer of the Attestation Result</td>
+              <td class="text-left" rowspan="1" colspan="1">Relying Party</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+</section>
+</div>
+<div id="the-signed-composite-eat">
+<section id="section-4">
+      <h2 id="name-the-signed-composite-eat">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-the-signed-composite-eat" class="section-name selfRef">The Signed Composite EAT</a>
+      </h2>
+<div id="profile-conformance">
+<section id="section-4.1">
+        <h3 id="name-profile-conformance">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-profile-conformance" class="section-name selfRef">Profile Conformance</a>
+        </h3>
+<p id="section-4.1-1">This section states the <span><a href="https://rfc-editor.org/rfc/rfc9711#section-6" class="relref">Section 6</a> of [<a href="#RFC9711" class="cite xref">RFC9711</a>]</span> profile items for this
+profile.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<span id="name-profile-conformance-2"></span><table class="center" id="table-2">
+          <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-profile-conformance-2" class="selfRef">Profile conformance</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Profile item</th>
+              <th class="text-left" rowspan="1" colspan="1">This profile</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Profile identifier (<code>eat_profile</code>, claim 265)</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>https://datatracker.ietf.org/doc/draft-sun-rats-composite-eat/</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Serialization</td>
+              <td class="text-left" rowspan="1" colspan="1">CBOR <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> with deterministic encoding and definite-length items</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Top-level message</td>
+              <td class="text-left" rowspan="1" colspan="1">Detached EAT Bundle with tag 602 <span>[<a href="#RFC9711" class="cite xref">RFC9711</a>]</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Top-level media type</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>application/eat-bun+cbor</code> <span>[<a href="#RFC9782" class="cite xref">RFC9782</a>]</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Main token</td>
+              <td class="text-left" rowspan="1" colspan="1">CWT tag 61 containing COSE_Sign1 tag 18</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Token protection</td>
+              <td class="text-left" rowspan="1" colspan="1">COSE_Sign1 <span>[<a href="#RFC9052" class="cite xref">RFC9052</a>]</span> using ES384 (algorithm -35) <span>[<a href="#RFC9053" class="cite xref">RFC9053</a>]</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Detached digest</td>
+              <td class="text-left" rowspan="1" colspan="1">SHA-384 (algorithm -43), 48-byte output <span>[<a href="#RFC9053" class="cite xref">RFC9053</a>]</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Key identification</td>
+              <td class="text-left" rowspan="1" colspan="1">Protected SHA-384 <code>x5t</code> (label 34) and unprotected leaf-first <code>x5chain</code> (label 33) <span>[<a href="#RFC9360" class="cite xref">RFC9360</a>]</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Freshness</td>
+              <td class="text-left" rowspan="1" colspan="1">One 32-byte <code>eat_nonce</code>, unique for each request</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Main token content type</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>application/eat+cwt</code> <span>[<a href="#RFC9782" class="cite xref">RFC9782</a>]</span>
+</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-4.1-3">Conforming producers <span class="bcp14">MUST</span> emit every choice in the table above. Conforming
+Verifiers <span class="bcp14">MUST</span> support those choices. This is a full EAT profile in the sense
+of <span><a href="https://rfc-editor.org/rfc/rfc9711#section-6.2" class="relref">Section 6.2</a> of [<a href="#RFC9711" class="cite xref">RFC9711</a>]</span>.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="bundle">
+<section id="section-4.2">
+        <h3 id="name-bundle-structure">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-bundle-structure" class="section-name selfRef">Bundle Structure</a>
+        </h3>
+<p id="section-4.2-1">The authoritative artifact is a Detached EAT Bundle (CBOR tag 602,
+<span>[<a href="#RFC9711" class="cite xref">RFC9711</a>]</span>). This profile does not redefine the tag-602 construct; it
+constrains its two slots: slot 1 is the signed composite EAT
+(<code>main-token</code>); slot 2 is the detached Claims-Set map keyed by Target
+Environment Identifier and defined in <a href="#detached-evidence" class="auto internal xref">Section 5</a>.
+When conveyed with a media type, the bundle <span class="bcp14">MUST</span> use
+<code>application/eat-bun+cbor</code> <span>[<a href="#RFC9782" class="cite xref">RFC9782</a>]</span>.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<div class="lang-cddl sourcecode" id="section-4.2-2">
+<pre>
+composite-bundle = #6.602([
+  main-token: bstr .cbor composite-eat,         ; slot 1, see 4.3/4.4
+  detached-claims-sets: {                  ; slot 2, see Section 5
+    + env-id =&gt; bstr .cbor detached-claims-set
+  }
+])
+
+composite-eat = #6.61(#6.18([      ; COSE_Sign1-tagged CWT
+  protected:   bstr .cbor protected-headers,
+  unprotected: unprotected-headers,
+  payload:     bstr .cbor composite-eat-claims,
+  signature:   bstr
+]))
+
+protected-headers = {
+  1:  -35,                     ; alg: ES384
+  3:  "application/eat+cwt",  ; content_type
+  34: certificate-thumbprint   ; x5t: SHA-384 of leaf certificate
+}
+
+certificate-thumbprint = [ -43, bstr .size 48 ]
+
+unprotected-headers = {
+  33: cose-x509-chain          ; x5chain: leaf certificate first
+}
+
+cose-x509-chain = bstr / [ 2* bstr ]
+</pre><a href="#section-4.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-4.2-3">Every certificate in <code>cose-x509-chain</code> is a DER-encoded certificate. When the
+chain contains more than one certificate, it <span class="bcp14">MUST</span> be ordered starting with the
+Lead Attester end-entity certificate, as specified by <span>[<a href="#RFC9360" class="cite xref">RFC9360</a>]</span>. The
+protected <code>x5t</code> <span class="bcp14">MUST</span> use SHA-384 (algorithm -43) and <span class="bcp14">MUST</span> equal the SHA-384
+digest of the complete DER encoding of that end-entity certificate. This
+integrity-protects the end-entity certificate while allowing <code>x5chain</code> to be
+carried in the unprotected header bucket, as permitted by <span>[<a href="#RFC9360" class="cite xref">RFC9360</a>]</span>.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.2-4">A Verifier <span class="bcp14">MUST</span> reject the token if the protected <code>x5t</code> does not match the
+first certificate in <code>x5chain</code>. It <span class="bcp14">MUST</span> treat every carried certificate as
+untrusted input and validate a path to a trust anchor configured independently
+of the bundle, including applicable certificate usage, validity, and
+revocation checks <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="top-claims">
+<section id="section-4.3">
+        <h3 id="name-top-level-claims">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-top-level-claims" class="section-name selfRef">Top-Level Claims</a>
+        </h3>
+<div class="lang-cddl sourcecode" id="section-4.3-1">
+<pre>
+composite-eat-claims = {
+  10:  bstr .size 32,     ; eat_nonce      (MANDATORY) Verifier nonce
+  265: general-uri,      ; eat_profile    (MANDATORY)
+  256: bstr .size (7..33), ; ueid         (MANDATORY) Lead id
+  273: measurements-type, ; measurements  (MANDATORY) see 4.4
+  266: submods-type,      ; submods       (MANDATORY) see 5.1
+  ? TBD_PLATFORM_CORIM_ID =&gt; general-uri, ; OPTIONAL locator hint
+}
+</pre><a href="#section-4.3-1" class="pilcrow">¶</a>
+</div>
+<p id="section-4.3-2">The <code>eat_nonce</code> claim contains exactly one nonce. The Verifier <span class="bcp14">MUST</span> generate a
+new nonce for every request, and the same nonce <span class="bcp14">MUST</span> be used to obtain each
+nonce-capable Sub-Attester evidence item included in the resulting bundle.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.3-3">The <code>TBD_PLATFORM_CORIM_ID</code> claim is a Verifier lookup/audit hint only
+and is not appraisal authority; see <a href="#iana" class="auto internal xref">Section 9</a>.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="self-meas">
+<section id="section-4.4">
+        <h3 id="name-lead-attester-self-measurem">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-lead-attester-self-measurem" class="section-name selfRef">Lead Attester Self-Measurements</a>
+        </h3>
+<p id="section-4.4-1">The Lead Attester's platform-local evidence (RoT and platform firmware)
+is carried in the top-level <code>measurements</code> claim (273), not in <code>submods</code>.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<div class="lang-cddl sourcecode" id="section-4.4-2">
+<pre>
+measurements-type = [ + lead-attester-measurement ]
+
+lead-attester-measurement = [
+  content-format: uint .le 65535,  ; payload CoAP Content-Format
+  value: bstr                      ; payload bytes per content-format
+]
+</pre><a href="#section-4.4-2" class="pilcrow">¶</a>
+</div>
+<p id="section-4.4-3">This constrains the <code>measurements</code> claim format defined by <span>[<a href="#RFC9711" class="cite xref">RFC9711</a>]</span>;
+it does not define a map-based replacement for that claim. The Lead
+Attester <span class="bcp14">MUST</span> use a registered CoAP Content-Format for each <code>value</code>.<a href="#section-4.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="detached-evidence">
+<section id="section-5">
+      <h2 id="name-detached-sub-attester-evide">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-detached-sub-attester-evide" class="section-name selfRef">Detached Sub-Attester Evidence</a>
+      </h2>
+<div id="digest-binding">
+<section id="section-5.1">
+        <h3 id="name-detached-submodule-digest-b">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-detached-submodule-digest-b" class="section-name selfRef">Detached-Submodule-Digest Binding</a>
+        </h3>
+<p id="section-5.1-1">Every Sub-Attester is represented in the signed token as a
+Detached-Submodule-Digest (<span>[<a href="#RFC9711" class="cite xref">RFC9711</a>]</span>). The full evidence is the
+detached Claims-Set in slot 2 of <a href="#bundle" class="auto internal xref">Section 4.2</a>, keyed by the same Target
+Environment Identifier.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<div class="lang-cddl sourcecode" id="section-5.1-2">
+<pre>
+submods-type = { + env-id =&gt; detached-submodule-digest }
+
+detached-submodule-digest = [
+  hash-alg: -43,          ; SHA-384 in the COSE Algorithms registry
+  digest:   bstr .size 48 ; over encoded detached Claims-Set bytes
+]
+
+env-id = tstr
+</pre><a href="#section-5.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-5.1-3">Binding invariant: for every Target Environment Identifier E,
+<code>submods[E]</code> in the signed token <span class="bcp14">MUST</span> equal the digest, computed per
+<a href="#digest-rules" class="auto internal xref">Section 5.2</a>, of <code>detached-claims-sets[E]</code> in the bundle.
+The key set of <code>submods</code> <span class="bcp14">MUST</span> be identical to the key set of
+<code>detached-claims-sets</code>. A Verifier <span class="bcp14">MUST</span> reject a bundle containing a missing
+or unreferenced detached Claims-Set.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+<p id="section-5.1-4">Using detached digests for every Sub-Attester keeps the signed composite token
+and the Lead Attester input bounded by Sub-Attester count rather than by native
+evidence size. It also allows additional native evidence formats without
+changing the <code>submods</code> shape.<a href="#section-5.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="digest-rules">
+<section id="section-5.2">
+        <h3 id="name-deterministic-encoding-and-">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-deterministic-encoding-and-" class="section-name selfRef">Deterministic Encoding and Digest Rules</a>
+        </h3>
+<p id="section-5.2-1">Each detached Claims-Set <span class="bcp14">MUST</span> be encoded with deterministic CBOR
+(<span><a href="https://rfc-editor.org/rfc/rfc8949#section-4.2" class="relref">Section 4.2</a> of [<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>). The detached-submodule digest <span class="bcp14">MUST</span> be
+computed over the encoded Claims-Set bytes directly, not over the
+byte-string wrapper used in the bundle and not over any textual
+encoding. This rule is the anti-forgery anchor: a modified or fabricated
+detached Claims-Set fails either the signed digest comparison or the
+device evidence signature check.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">SHA-384 (COSE algorithm -43) <span class="bcp14">MUST</span> be used for every detached-submodule
+digest. This digest algorithm is independent of any measurement hash
+algorithm negotiated by a native evidence protocol such as SPDM.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="native-evidence">
+<section id="section-5.3">
+        <h3 id="name-native-evidence-carriage">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-native-evidence-carriage" class="section-name selfRef">Native Evidence Carriage</a>
+        </h3>
+<p id="section-5.3-1">Sub-attester evidence is preserved in its native encoding as the value of one
+profile-defined CWT claim. Using one integer claim key satisfies the CBOR claim
+key requirements of <span>[<a href="#RFC9711" class="cite xref">RFC9711</a>]</span> while allowing the profile to carry several
+native evidence formats.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<div class="lang-cddl sourcecode" id="section-5.3-2">
+<pre>
+detached-claims-set = {
+  TBD_NATIVE_EVIDENCE =&gt; native-evidence
+}
+
+native-evidence = spdm-evidence / device-eat-evidence
+</pre><a href="#section-5.3-2" class="pilcrow">¶</a>
+</div>
+<p id="section-5.3-3">The Collector constructs the enclosing Claims-Set and evidence-type array. It
+<span class="bcp14">MUST NOT</span> alter, translate, or re-author the native evidence bytes placed in
+that array.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<div id="spdm-signed-measurements">
+<section id="section-5.3.1">
+          <h4 id="name-spdm-signed-measurements">
+<a href="#section-5.3.1" class="section-number selfRef">5.3.1. </a><a href="#name-spdm-signed-measurements" class="section-name selfRef">SPDM Signed Measurements</a>
+          </h4>
+<div class="lang-cddl sourcecode" id="section-5.3.1-1">
+<pre>
+spdm-evidence = [
+  evidence-type: 1,
+  signed-measurements: bstr,  ; native SignedMeasurements bytes
+  cert-chain: bstr,           ; reassembled SPDM certificate chain
+  ? vca: bstr                 ; required for SPDM 1.0/1.1
+]
+</pre><a href="#section-5.3.1-1" class="pilcrow">¶</a>
+</div>
+<p id="section-5.3.1-2"><code>signed-measurements</code> is the binary Redfish/SPDM SignedMeasurements value. For
+SPDM 1.2 and later it includes the negotiated-version, capabilities, and
+algorithms (VCA) transcript; for SPDM 1.0 and 1.1 it contains only the signed
+<code>GET_MEASUREMENTS</code> exchange. <code>cert-chain</code> is the raw reassembled SPDM
+certificate-chain object, not a PEM encoding or management-interface
+projection. <code>vca</code> is the observed VCA transcript and <span class="bcp14">MUST</span> be present for SPDM
+1.0 and 1.1; it <span class="bcp14">MUST</span> be absent for SPDM 1.2 and later. See <span>[<a href="#DSP0274" class="cite xref">DSP0274</a>]</span>.<a href="#section-5.3.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="device-emitted-eat">
+<section id="section-5.3.2">
+          <h4 id="name-device-emitted-eat">
+<a href="#section-5.3.2" class="section-number selfRef">5.3.2. </a><a href="#name-device-emitted-eat" class="section-name selfRef">Device-Emitted EAT</a>
+          </h4>
+<div class="lang-cddl sourcecode" id="section-5.3.2-1">
+<pre>
+device-eat-evidence = [
+  evidence-type: 2,
+  token-format: tstr,   ; media type, e.g. "application/eat+cwt"
+  device-token: bstr
+]
+</pre><a href="#section-5.3.2-1" class="pilcrow">¶</a>
+</div>
+<p id="section-5.3.2-2"><code>device-token</code> <span class="bcp14">MUST</span> contain the complete token as emitted by the device, and
+<code>token-format</code> <span class="bcp14">MUST</span> identify its media type. The token <span class="bcp14">MUST</span> cryptographically
+bind the Verifier nonce. A device token of the form defined in
+<span>[<a href="#I-D.poirier-rats-eat-da" class="cite xref">I-D.poirier-rats-eat-da</a>]</span> <span class="bcp14">MAY</span> be carried here.<a href="#section-5.3.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="spdm-carried-tcg-dice-concise-evidence">
+<section id="section-5.3.3">
+          <h4 id="name-spdm-carried-tcg-dice-conci">
+<a href="#section-5.3.3" class="section-number selfRef">5.3.3. </a><a href="#name-spdm-carried-tcg-dice-conci" class="section-name selfRef">SPDM-Carried TCG DICE Concise Evidence</a>
+          </h4>
+<p id="section-5.3.3-1">Signed measurements that carry TCG DICE Concise Evidence <span>[<a href="#TCG-DICE-CE" class="cite xref">TCG-DICE-CE</a>]</span>
+use the <code>spdm-evidence</code> schema above; the measurement blocks
+are preserved verbatim.<a href="#section-5.3.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.3-2">The Collector does not need to distinguish ordinary SPDM measurements from
+SPDM measurements carrying TCG DICE Concise Evidence. The Verifier interprets
+the signed measurement blocks according to the applicable evidence profile.<a href="#section-5.3.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="relationship-to-conceptual-message-wrappers">
+<section id="section-5.3.4">
+          <h4 id="name-relationship-to-conceptual-">
+<a href="#section-5.3.4" class="section-number selfRef">5.3.4. </a><a href="#name-relationship-to-conceptual-" class="section-name selfRef">Relationship to Conceptual Message Wrappers</a>
+          </h4>
+<p id="section-5.3.4-1">This profile does not permit Conceptual Message Wrapper (CMW) typed values
+inside <code>TBD_NATIVE_EVIDENCE</code>; allowing an alternate inner representation would
+make the digest input ambiguous. A conveying protocol <span class="bcp14">MAY</span> carry the complete
+<code>composite-bundle</code> as a CMW typed value <span>[<a href="#RFC9999" class="cite xref">RFC9999</a>]</span>. Such an
+outer wrapper is not part of any detached Claims-Set digest input.<a href="#section-5.3.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="env-id">
+<section id="section-5.4">
+        <h3 id="name-target-environment-identifi">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-target-environment-identifi" class="section-name selfRef">Target Environment Identifier</a>
+        </h3>
+<p id="section-5.4-1">The <code>submods</code> key and detached Claims-Set map key is a stable,
+operator-owned Target Environment Identifier, distinct from SPDM slot
+IDs, MCTP EIDs, device UUIDs, and CoRIM IDs. It:<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-5.4-2">
+<li id="section-5.4-2.1">
+            <p id="section-5.4-2.1.1">is lowercase ASCII;<a href="#section-5.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.4-2.2">
+            <p id="section-5.4-2.2.1">is dot-separated with first component <code>env</code>;<a href="#section-5.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.4-2.3">
+            <p id="section-5.4-2.3.1">names the expected environment, not the device instance;<a href="#section-5.4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.4-2.4">
+            <p id="section-5.4-2.4.1">is at most 64 bytes.<a href="#section-5.4-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-5.4-3">Examples: <code>env.nic.0</code>, <code>env.gpu.0</code>, <code>env.pcie.4</code>.<a href="#section-5.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="verification">
+<section id="section-6">
+      <h2 id="name-verification-informative">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-verification-informative" class="section-name selfRef">Verification (Informative)</a>
+      </h2>
+<p id="section-6-1">A Verifier is expected to perform the following checks before producing an
+attestation result:<a href="#section-6-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6-2">
+<li id="section-6-2.1">
+          <p id="section-6-2.1.1">Decode the bundle, confirm tag 602, and enforce the encoding and algorithm
+  choices in <a href="#profile-conformance" class="auto internal xref">Section 4.1</a>.<a href="#section-6-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-6-2.2">
+          <p id="section-6-2.2.1">Match protected <code>x5t</code> to the end-entity certificate in <code>x5chain</code>, validate
+  the Lead Attester certificate path, and validate the COSE_Sign1 signature.<a href="#section-6-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-6-2.3">
+          <p id="section-6-2.3.1">Match <code>eat_nonce</code> to the challenge, match <code>eat_profile</code> to this profile, and
+  validate the Lead Attester <code>ueid</code> and measurements.<a href="#section-6-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-6-2.4">
+          <p id="section-6-2.4.1">Require identical <code>submods</code> and detached Claims-Set key sets, then recompute
+  every digest per <a href="#digest-rules" class="auto internal xref">Section 5.2</a>.<a href="#section-6-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-6-2.5">
+          <p id="section-6-2.5.1">Parse each <code>TBD_NATIVE_EVIDENCE</code> value, validate its native signature and
+  certificate or token chain, and match its nonce to the challenge.<a href="#section-6-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-6-2.6">
+          <p id="section-6-2.6.1">Match the identity proven by each native evidence item to the expected
+  identity for its Target Environment Identifier.<a href="#section-6-2.6.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+<p id="section-6-3">Completeness and anti-substitution are appraisal outcomes, not properties
+of the composite signature alone. They are determined by comparing the
+signed <code>submods</code> set and proven device identities against a platform
+composition endorsement (for example, a platform CoRIM profile;
+see <span>[<a href="#I-D.ietf-rats-corim" class="cite xref">I-D.ietf-rats-corim</a>]</span>), which is specified separately.
+Native Sub-Attester measurements are appraised against trusted device
+reference values, such as vendor CoRIMs, selected by Verifier policy. This
+profile does not define endorsement selection or reference-value appraisal.<a href="#section-6-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security">
+<section id="section-7">
+      <h2 id="name-security-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-7-1">The security considerations of <span>[<a href="#RFC8392" class="cite xref">RFC8392</a>]</span>, <span>[<a href="#RFC9052" class="cite xref">RFC9052</a>]</span>, <span>[<a href="#RFC9360" class="cite xref">RFC9360</a>]</span>,
+<span>[<a href="#RFC9711" class="cite xref">RFC9711</a>]</span>, and <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span> apply.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<div id="untrusted-collector-threat-model">
+<section id="section-7.1">
+        <h3 id="name-untrusted-collector-threat-">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-untrusted-collector-threat-" class="section-name selfRef">Untrusted Collector Threat Model</a>
+        </h3>
+<p id="section-7.1-1">The Collector may drop, reorder, or mislabel evidence. A dropped device
+yields no valid submodule digest; exact key-set checking detects a detached
+Claims-Set omitted from the bundle, while appraisal against a platform
+composition endorsement detects an expected environment omitted from both
+maps. Reordering has no semantic effect because both collections are maps and
+their deterministic encodings are checked by digest. A mislabeled environment
+is detected when the identity proven by native evidence does not match the
+expected identity for that Target Environment. If appraisal policy has no
+trusted identity-to-environment binding, this profile alone cannot detect such
+substitution.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-2">The Collector cannot forge the composite signature or a Sub-Attester's native
+signature. It can, however, choose the label and digest records submitted to
+the Lead Attester. Consequently, the composite signature proves integrity and
+freshness of the included set; it does not prove that collection was complete
+or that a label was assigned correctly.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<p id="section-7.1-3">The profile binds a proven Sub-Attester identity to a logical Target
+Environment Identifier. It does not prove physical connector locality or
+prevent bus-level relay. Deployments requiring those properties need an
+additional platform-specific transport or hardware binding.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="provenance-preservation">
+<section id="section-7.2">
+        <h3 id="name-provenance-preservation">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-provenance-preservation" class="section-name selfRef">Provenance Preservation</a>
+        </h3>
+<p id="section-7.2-1">Because sub-attester evidence is carried verbatim and pinned by a signed
+digest, device signatures remain end-to-end verifiable through an
+untrusted Collector. A Verifier <span class="bcp14">MUST</span> validate both layers: accepting the
+composite signature without validating native evidence would incorrectly treat
+Collector-authored bytes as device-authored evidence.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-2">The top-level nonce prevents replay of the composite EAT. Each native evidence
+item <span class="bcp14">MUST</span> independently prove binding to the same nonce; otherwise a Collector
+could combine current platform evidence with stale device evidence. A Verifier
+<span class="bcp14">MUST</span> reject a native evidence item whose nonce is absent, unverifiable, or does
+not match the challenge.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+<p id="section-7.2-3">The fixed ES384 and SHA-384 choices prevent algorithm substitution at the
+composite layer. For SPDM 1.0 and 1.1, the separately carried VCA transcript is
+not covered by the responder's measurement signature. Deployments requiring
+cryptographic binding of negotiated SPDM parameters <span class="bcp14">MUST</span> require SPDM 1.2 or
+later in appraisal policy.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="aggregator-self-attestation-and-key-handling">
+<section id="section-7.3">
+        <h3 id="name-aggregator-self-attestation">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-aggregator-self-attestation" class="section-name selfRef">Aggregator Self-Attestation and Key Handling</a>
+        </h3>
+<p id="section-7.3-1">The Lead Attester signs with a protected attestation key and contributes
+its own measurements. The signing key and the source of <code>ueid</code> and top-level
+measurements <span class="bcp14">MUST</span> be protected from the Collector. The <code>ueid</code> <span class="bcp14">MUST</span> be
+provisioned according to <span>[<a href="#RFC9711" class="cite xref">RFC9711</a>]</span> and remain stable for the Lead Attester.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3-2">Compromise of the Lead Attester signing key permits forgery of the composite
+envelope, its nonce, Lead Attester measurements, labels, and device-evidence
+digests. It does not permit forgery of uncompromised Sub-Attester signatures,
+but it defeats the platform-scoped binding supplied by this profile. Verifiers
+therefore <span class="bcp14">MUST</span> validate the Lead Attester certificate path, revocation state,
+and applicable authorization policy rather than trusting a chain merely
+because it is carried in <code>x5chain</code>. They <span class="bcp14">MUST</span> also match the protected <code>x5t</code>
+to the end-entity certificate before accepting the Lead Attester signature.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
+<p id="section-7.3-3">If <code>x5chain</code> were accepted without the protected <code>x5t</code> check, an attacker could
+substitute another certificate for the same public key and cause an identity
+misbinding when the issuing CA did not require proof of possession. The
+protected <code>x5t</code> prevents this attack by signing the exact end-entity
+certificate identity <span>[<a href="#RFC9360" class="cite xref">RFC9360</a>]</span>.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="resource-exhaustion">
+<section id="section-7.4">
+        <h3 id="name-resource-exhaustion">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-resource-exhaustion" class="section-name selfRef">Resource Exhaustion</a>
+        </h3>
+<p id="section-7.4-1">Detached evidence, certificate chains, and the number of submodules are
+attacker-influenced inputs. Implementations <span class="bcp14">SHOULD</span> enforce deployment-specific
+limits on bundle size, Claims-Set size, certificate-chain length, and submodule
+count. Verifiers <span class="bcp14">SHOULD</span> validate structure and signed digests before performing
+expensive native-evidence appraisal, without treating a valid digest as a
+substitute for native signature validation.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="privacy-considerations">
+<section id="section-8">
+      <h2 id="name-privacy-considerations">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
+      </h2>
+<p id="section-8-1">A stable Lead Attester <code>ueid</code> and end-entity certificate enable correlation of
+attestations from the same platform. Native device certificates and
+device-emitted tokens can similarly identify and correlate individual
+Sub-Attesters. Target Environment Identifiers expose platform topology, and
+measurements can reveal firmware versions or configuration.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">Deployments <span class="bcp14">SHOULD</span> restrict bundle access to authorized Verifiers and use a
+confidentiality-protected conveying protocol when these identifiers or
+measurements are sensitive. A Verifier <span class="bcp14">SHOULD</span> disclose only the attestation
+result needed by a Relying Party rather than forwarding the complete bundle.
+Verifier nonces <span class="bcp14">SHOULD</span> be unpredictable random values and <span class="bcp14">MUST NOT</span> encode user,
+account, workload, or other identifying information. Where stable platform
+identification is unnecessary, deployments should use a context-specific
+identity mechanism in a separate profile; replacing <code>ueid</code> ad hoc would not
+conform to this profile.<a href="#section-8-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana">
+<section id="section-9">
+      <h2 id="name-iana-considerations">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<div id="native-evidence-cwt-claim">
+<section id="section-9.1">
+        <h3 id="name-native-evidence-cwt-claim">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-native-evidence-cwt-claim" class="section-name selfRef">Native Evidence CWT Claim</a>
+        </h3>
+<p id="section-9.1-1">IANA is requested to register the following in the "CBOR Web Token (CWT)
+Claims" registry:<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.1-2.1">
+            <p id="section-9.1-2.1.1">Claim Name: Native Evidence<a href="#section-9.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.1-2.2">
+            <p id="section-9.1-2.2.1">Claim Description: Native evidence carried in a detached Claims-Set<a href="#section-9.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.1-2.3">
+            <p id="section-9.1-2.3.1">JWT Claim Name: N/A<a href="#section-9.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.1-2.4">
+            <p id="section-9.1-2.4.1">Claim Key: TBD (<code>TBD_NATIVE_EVIDENCE</code>)<a href="#section-9.1-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.1-2.5">
+            <p id="section-9.1-2.5.1">Claim Value Type: array<a href="#section-9.1-2.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.1-2.6">
+            <p id="section-9.1-2.6.1">Change Controller: IETF<a href="#section-9.1-2.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.1-2.7">
+            <p id="section-9.1-2.7.1">Reference: <a href="#native-evidence" class="auto internal xref">Section 5.3</a> of this document<a href="#section-9.1-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="platform-corim-locator-cwt-claim">
+<section id="section-9.2">
+        <h3 id="name-platform-corim-locator-cwt-">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-platform-corim-locator-cwt-" class="section-name selfRef">Platform CoRIM Locator CWT Claim</a>
+        </h3>
+<p id="section-9.2-1">IANA is requested to register the following in the "CBOR Web Token (CWT)
+Claims" registry:<a href="#section-9.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.2-2.1">
+            <p id="section-9.2-2.1.1">Claim Name: Platform CoRIM Locator<a href="#section-9.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.2-2.2">
+            <p id="section-9.2-2.2.1">Claim Description: Locator hint for a platform CoRIM<a href="#section-9.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.2-2.3">
+            <p id="section-9.2-2.3.1">JWT Claim Name: N/A<a href="#section-9.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.2-2.4">
+            <p id="section-9.2-2.4.1">Claim Key: TBD (<code>TBD_PLATFORM_CORIM_ID</code>)<a href="#section-9.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.2-2.5">
+            <p id="section-9.2-2.5.1">Claim Value Type: URI<a href="#section-9.2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.2-2.6">
+            <p id="section-9.2-2.6.1">Change Controller: IETF<a href="#section-9.2-2.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.2-2.7">
+            <p id="section-9.2-2.7.1">Reference: <a href="#top-claims" class="auto internal xref">Section 4.3</a> of this document<a href="#section-9.2-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="eat-profile-identifier">
+<section id="section-9.3">
+        <h3 id="name-eat-profile-identifier">
+<a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-eat-profile-identifier" class="section-name selfRef">EAT Profile Identifier</a>
+        </h3>
+<p id="section-9.3-1">This document defines the provisional <code>eat_profile</code> value
+<code>https://datatracker.ietf.org/doc/draft-sun-rats-composite-eat/</code>. This value
+identifies the complete profile defined by this Internet-Draft. It is expected
+to be replaced by an RFC-based identifier if this document is published as an
+RFC; implementations of an Internet-Draft version therefore <span class="bcp14">MUST</span> treat this
+value as provisional.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-10">
+      <h2 id="name-references">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-10.1">
+        <h3 id="name-normative-references">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="DSP0274">[DSP0274]</dt>
+        <dd>
+<span class="refAuthor">DMTF</span>, <span class="refTitle">"Security Protocol and Data Model (SPDM) Specification"</span>, <span class="seriesInfo">DSP0274 Version 1.3.2</span>, <time datetime="2023" class="refDate">2023</time>, <span>&lt;<a href="https://www.dmtf.org/dsp/DSP0274">https://www.dmtf.org/dsp/DSP0274</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5280">[RFC5280]</dt>
+        <dd>
+<span class="refAuthor">Cooper, D.</span>, <span class="refAuthor">Santesson, S.</span>, <span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Boeyen, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">W. Polk</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile"</span>, <span class="seriesInfo">RFC 5280</span>, <span class="seriesInfo">DOI 10.17487/RFC5280</span>, <time datetime="2008-05" class="refDate">May 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5280">https://www.rfc-editor.org/rfc/rfc5280</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8392">[RFC8392]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Wahlstroem, E.</span>, <span class="refAuthor">Erdtman, S.</span>, and <span class="refAuthor">H. Tschofenig</span>, <span class="refTitle">"CBOR Web Token (CWT)"</span>, <span class="seriesInfo">RFC 8392</span>, <span class="seriesInfo">DOI 10.17487/RFC8392</span>, <time datetime="2018-05" class="refDate">May 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8392">https://www.rfc-editor.org/rfc/rfc8392</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8610">[RFC8610]</dt>
+        <dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Vigano, C.</span>, and <span class="refAuthor">C. Bormann</span>, <span class="refTitle">"Concise Data Definition Language (CDDL): A Notational Convention to Express Concise Binary Object Representation (CBOR) and JSON Data Structures"</span>, <span class="seriesInfo">RFC 8610</span>, <span class="seriesInfo">DOI 10.17487/RFC8610</span>, <time datetime="2019-06" class="refDate">June 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8610">https://www.rfc-editor.org/rfc/rfc8610</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8949">[RFC8949]</dt>
+        <dd>
+<span class="refAuthor">Bormann, C.</span> and <span class="refAuthor">P. Hoffman</span>, <span class="refTitle">"Concise Binary Object Representation (CBOR)"</span>, <span class="seriesInfo">STD 94</span>, <span class="seriesInfo">RFC 8949</span>, <span class="seriesInfo">DOI 10.17487/RFC8949</span>, <time datetime="2020-12" class="refDate">December 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8949">https://www.rfc-editor.org/rfc/rfc8949</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9052">[RFC9052]</dt>
+        <dd>
+<span class="refAuthor">Schaad, J.</span>, <span class="refTitle">"CBOR Object Signing and Encryption (COSE): Structures and Process"</span>, <span class="seriesInfo">STD 96</span>, <span class="seriesInfo">RFC 9052</span>, <span class="seriesInfo">DOI 10.17487/RFC9052</span>, <time datetime="2022-08" class="refDate">August 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9052">https://www.rfc-editor.org/rfc/rfc9052</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9053">[RFC9053]</dt>
+        <dd>
+<span class="refAuthor">Schaad, J.</span>, <span class="refTitle">"CBOR Object Signing and Encryption (COSE): Initial Algorithms"</span>, <span class="seriesInfo">RFC 9053</span>, <span class="seriesInfo">DOI 10.17487/RFC9053</span>, <time datetime="2022-08" class="refDate">August 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9053">https://www.rfc-editor.org/rfc/rfc9053</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9334">[RFC9334]</dt>
+        <dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Thaler, D.</span>, <span class="refAuthor">Richardson, M.</span>, <span class="refAuthor">Smith, N.</span>, and <span class="refAuthor">W. Pan</span>, <span class="refTitle">"Remote ATtestation procedureS (RATS) Architecture"</span>, <span class="seriesInfo">RFC 9334</span>, <span class="seriesInfo">DOI 10.17487/RFC9334</span>, <time datetime="2023-01" class="refDate">January 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9334">https://www.rfc-editor.org/rfc/rfc9334</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9360">[RFC9360]</dt>
+        <dd>
+<span class="refAuthor">Schaad, J.</span>, <span class="refTitle">"CBOR Object Signing and Encryption (COSE): Header Parameters for Carrying and Referencing X.509 Certificates"</span>, <span class="seriesInfo">RFC 9360</span>, <span class="seriesInfo">DOI 10.17487/RFC9360</span>, <time datetime="2023-02" class="refDate">February 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9360">https://www.rfc-editor.org/rfc/rfc9360</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9711">[RFC9711]</dt>
+        <dd>
+<span class="refAuthor">Lundblade, L.</span>, <span class="refAuthor">Mandyam, G.</span>, <span class="refAuthor">O'Donoghue, J.</span>, and <span class="refAuthor">C. Wallace</span>, <span class="refTitle">"The Entity Attestation Token (EAT)"</span>, <span class="seriesInfo">RFC 9711</span>, <span class="seriesInfo">DOI 10.17487/RFC9711</span>, <time datetime="2025-04" class="refDate">April 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9711">https://www.rfc-editor.org/rfc/rfc9711</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9782">[RFC9782]</dt>
+      <dd>
+<span class="refAuthor">Lundblade, L.</span>, <span class="refAuthor">Birkholz, H.</span>, and <span class="refAuthor">T. Fossati</span>, <span class="refTitle">"Entity Attestation Token (EAT) Media Types"</span>, <span class="seriesInfo">RFC 9782</span>, <span class="seriesInfo">DOI 10.17487/RFC9782</span>, <time datetime="2025-05" class="refDate">May 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9782">https://www.rfc-editor.org/rfc/rfc9782</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-10.2">
+        <h3 id="name-informative-references">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="I-D.ietf-rats-corim">[I-D.ietf-rats-corim]</dt>
+        <dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Fossati, T.</span>, <span class="refAuthor">Deshpande, Y.</span>, <span class="refAuthor">Smith, N.</span>, and <span class="refAuthor">W. Pan</span>, <span class="refTitle">"Concise Reference Integrity Manifest"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-rats-corim-11</span>, <time datetime="2026-07-06" class="refDate">6 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-11">https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-11</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.poirier-rats-eat-da">[I-D.poirier-rats-eat-da]</dt>
+        <dd>
+<span class="refAuthor">Poirier, M.</span>, <span class="refAuthor">Birkholz, H.</span>, and <span class="refAuthor">T. Fossati</span>, <span class="refTitle">"An EAT Profile for Trustworthy Device Assignment"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-poirier-rats-eat-da-10</span>, <time datetime="2026-06-23" class="refDate">23 June 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-poirier-rats-eat-da-10">https://datatracker.ietf.org/doc/html/draft-poirier-rats-eat-da-10</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9999">[RFC9999]</dt>
+        <dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Smith, N.</span>, <span class="refAuthor">Fossati, T.</span>, and <span class="refAuthor">H. Tschofenig</span>, <span class="refTitle">"Remote ATtestation procedureS (RATS) Conceptual Message Wrapper (CMW)"</span>, <span class="seriesInfo">RFC 9999</span>, <span class="seriesInfo">DOI 10.17487/RFC9999</span>, <time datetime="2026-07" class="refDate">July 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9999">https://www.rfc-editor.org/rfc/rfc9999</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="TCG-DICE-CE">[TCG-DICE-CE]</dt>
+      <dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"DICE Attestation Architecture (Concise Evidence)"</span>, <span>&lt;<a href="https://trustedcomputinggroup.org/">https://trustedcomputinggroup.org/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="appendix-example">
+<section id="appendix-A">
+      <h2 id="name-worked-example">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-worked-example" class="section-name selfRef">Worked Example</a>
+      </h2>
+<p id="appendix-A-1">This non-normative example uses temporary claim keys 60000 and 60001 from
+<a href="#appendix-cddl" class="auto internal xref">Appendix B</a>. The Verifier nonce is the 32-byte sequence 0x00 through
+0x1f. The Lead Attester and device token use separate P-384 signing keys and
+self-signed example certificates. These certificates are test inputs, not
+trust anchors for deployment. For compactness, the SPDM byte strings are
+illustrative carriage values rather than a complete SPDM transcript and
+certificate chain.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">The following diagnostic notation elides long certificates, signatures, and
+nested token bytes. The complete encoded bundle follows it.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<div class="lang-cbor-diag sourcecode" id="appendix-A-3">
+<pre>
+602([
+  &lt;&lt;61(18([
+    &lt;&lt;{
+      1: -35,
+      3: "application/eat+cwt",
+      34: [-43,
+        h'6be9f10e1e9388b0f70028b060dc215a0dc4f1b2d60b407689465be40d6e1a28e31e3d7186968eac00ea97db833d715c']
+    }&gt;&gt;,
+    {33: h'&lt;Lead Attester certificate&gt;'},
+    &lt;&lt;{
+      10: h'000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+      256: h'0111111111111111111111111111111111',
+      265: "https://datatracker.ietf.org/doc/draft-sun-rats-composite-eat/",
+      266: {
+        "env.accel.0": [-43,
+          h'a24620821bdc8c9aec86dae14bbce0a627c13fe41cefe58eb20cd748eb56154391368d509d001f70e1c6cfe2815c388c'],
+        "env.nic.0": [-43,
+          h'3032f9a41a6156dc45e054276a775bebade2a795c2412b91319326c6a299af6c2ceba175fc8fa4c51eb7721939760cf1']
+      },
+      273: [[60, h'a1015830aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa']],
+      60001: "tag:example.com,2026:platform-corim:v1"
+    }&gt;&gt;,
+    h'&lt;Lead Attester ES384 signature&gt;'
+  ]))&gt;&gt;,
+  {
+    "env.accel.0": &lt;&lt;{
+      60000: [2, "application/eat+cwt", h'&lt;device CWT&gt;']
+    }&gt;&gt;,
+    "env.nic.0": &lt;&lt;{
+      60000: [1, h'12010000aabbccdd', h'30820100deadbeef']
+    }&gt;&gt;
+  }
+])
+</pre><a href="#appendix-A-3" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-4">The SHA-384 digest of the encoded <code>env.nic.0</code> Claims-Set is
+<code>3032f9a41a6156dc45e054276a775bebade2a795c2412b91319326c6a299af6c2ceba175fc8fa4c51eb7721939760cf1</code>.
+The SHA-384 digest of the encoded <code>env.accel.0</code> Claims-Set is
+<code>a24620821bdc8c9aec86dae14bbce0a627c13fe41cefe58eb20cd748eb56154391368d509d001f70e1c6cfe2815c388c</code>.
+Both values appear under claim 266 in the signed main token.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<p id="appendix-A-5">The complete 1682-byte bundle is below. A backslash indicates that one
+hexadecimal string continues on the next display line; the backslash and
+following indentation are not part of the encoded value.<a href="#appendix-A-5" class="pilcrow">¶</a></p>
+<div class="breakable lang-hex sourcecode" id="appendix-A-6">
+<pre>
+d9025a825903b2d83dd2845850a301382203736170706c69636174696f6e2f65\
+  61742b637774182282382a58306be9f10e1e9388b0f70028b060dc215a0dc4f1\
+  b2d60b407689465be40d6e1a28e31e3d7186968eac00ea97db833d715ca11821\
+  590189308201853082010ca003020102020101300a06082a8648ce3d04030330\
+  1d311b301906035504030c12436f6d706f7369746520454154204c656164301e\
+  170d3236303130313030303030305a170d3335303130313030303030305a301d\
+  311b301906035504030c12436f6d706f7369746520454154204c656164307630\
+  1006072a8648ce3d020106052b8104002203620004aa87ca22be8b05378eb1c7\
+  1ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e\
+  3872760ab73617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da31\
+  13b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5fa320301e300c0603551d13\
+  0101ff04023000300e0603551d0f0101ff040403020780300a06082a8648ce3d\
+  0403030367003064023019cb7d09c07d9219ba0ba82b672fe390f7d7213c7c53\
+  7555c2da46d446337ec9aa4a5f3c2428e83fb96c221ec56cfc6602302ab0be75\
+  23d7b0d26e7578d3a5edd42aeb413721cb28448d38c57be38fcfb4e4486d28a9\
+  4769251239cf21bf9e990429590168a60a5820000102030405060708090a0b0c\
+  0d0e0f101112131415161718191a1b1c1d1e1f19010051011111111111111111\
+  1111111111111111190109783e68747470733a2f2f64617461747261636b6572\
+  2e696574662e6f72672f646f632f64726166742d73756e2d726174732d636f6d\
+  706f736974652d6561742f19010aa269656e762e6e69632e3082382a58303032\
+  f9a41a6156dc45e054276a775bebade2a795c2412b91319326c6a299af6c2ceb\
+  a175fc8fa4c51eb7721939760cf16b656e762e616363656c2e3082382a5830a2\
+  4620821bdc8c9aec86dae14bbce0a627c13fe41cefe58eb20cd748eb56154391\
+  368d509d001f70e1c6cfe2815c388c1901118182183c5834a1015830aaaaaaaa\
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\
+  aaaaaaaaaaaaaaaaaaaaaaaa19ea6178267461673a6578616d706c652e636f6d\
+  2c323032363a706c6174666f726d2d636f72696d3a763158609ba7bac0c1a7ae\
+  bf32dd0ba61b9a805b083078f9a2ef213f29ca65251b377e866e1d86831c127c\
+  3d833f204f46f11c440477e9acfb3aa33dfc198d4ecfd617fc76560533ec2052\
+  db23ff6bb269ca38070e77858cb5178f9824009d6d1b29f2bea269656e762e6e\
+  69632e305818a119ea6083014812010000aabbccdd4830820100deadbeef6b65\
+  6e762e616363656c2e305902a5a119ea608302736170706c69636174696f6e2f\
+  6561742b637774590288d83dd2845850a301382203736170706c69636174696f\
+  6e2f6561742b637774182282382a5830b7a900ce4d95ace6ea3b75b6cc82744f\
+  300e940472f95f1113da57c424155a35ec5c6c0bf6a7d0e493aaae157dc9891a\
+  a1182159018f3082018b30820110a003020102020102300a06082a8648ce3d04\
+  0303301f311d301b06035504030c14436f6d706f736974652045415420446576\
+  696365301e170d3236303130313030303030305a170d33353031303130303030\
+  30305a301f311d301b06035504030c14436f6d706f7369746520454154204465\
+  766963653076301006072a8648ce3d020106052b810400220362000408d99905\
+  7ba3d2d969260045c55b97f089025959a6f434d651d207d19fb96e9e4fe0e86e\
+  be0e64f85b96a9c75295df618e80f1fa5b1b3cedb7bfe8dffd6dba74b275d875\
+  bc6cc43e904e505f256ab4255ffd43e94d39e22d61501e700a940e80a320301e\
+  300c0603551d130101ff04023000300e0603551d0f0101ff040403020780300a\
+  06082a8648ce3d0403030369003066023100e8b3fc58e9c4176767c93e285dcc\
+  47fc7896ed6fffa0507686e0ae8cd1843ffbf9819120dbc1197ab481bb3fb54c\
+  5f40023100bbe55554d1806236717271f0bea0767109b1a31f57a236ee455569\
+  d1a72fb1d3e2fb3aa3d17a8cea6f14a79ff68a0cdb5839a20a58200001020304\
+  05060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f1901005101\
+  222222222222222222222222222222225860769f68a04a9cb32623612ee8771f\
+  6fc8583135d2272ef9269157b78582031201f2e1efcd9d38bf52d13c25cbb61e\
+  74f0f4da21f6608c8a31e6341c63ddd6f9f744e4abde132395f5bca83d098c71\
+  c715937f1c339cc6891d4652a8feaed85d79
+</pre><a href="#appendix-A-6" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="appendix-cddl">
+<section id="appendix-B">
+      <h2 id="name-collected-cddl">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-collected-cddl" class="section-name selfRef">Collected CDDL</a>
+      </h2>
+<p id="appendix-B-1">The following CDDL collects the definitions in this document. Values 60000 and
+60001 are temporary stand-ins used only to make this Internet-Draft and its
+examples mechanically testable; they are not IANA allocations and
+implementations <span class="bcp14">MUST NOT</span> treat them as stable claim keys.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<div class="breakable lang-cddl sourcecode" id="appendix-B-2">
+<pre>
+composite-bundle = #6.602([
+  main-token: bstr .cbor composite-eat,
+  detached-claims-sets: {
+    + env-id =&gt; bstr .cbor detached-claims-set
+  }
+])
+
+composite-eat = #6.61(#6.18([
+  protected: bstr .cbor protected-headers,
+  unprotected: unprotected-headers,
+  payload: bstr .cbor composite-eat-claims,
+  signature: bstr
+]))
+
+protected-headers = {
+  1: -35,
+  3: "application/eat+cwt",
+  34: certificate-thumbprint
+}
+
+certificate-thumbprint = [ -43, bstr .size 48 ]
+
+unprotected-headers = {
+  33: cose-x509-chain
+}
+
+cose-x509-chain = bstr / [ 2* bstr ]
+
+composite-eat-claims = {
+  10: bstr .size 32,
+  265: general-uri,
+  256: bstr .size (7..33),
+  273: measurements-type,
+  266: submods-type,
+  ? TBD_PLATFORM_CORIM_ID =&gt; general-uri
+}
+
+measurements-type = [ + lead-attester-measurement ]
+
+lead-attester-measurement = [
+  content-format: uint .le 65535,
+  value: bstr
+]
+
+submods-type = { + env-id =&gt; detached-submodule-digest }
+
+detached-submodule-digest = [
+  hash-alg: -43,
+  digest: bstr .size 48
+]
+
+detached-claims-set = {
+  TBD_NATIVE_EVIDENCE =&gt; native-evidence
+}
+
+native-evidence = spdm-evidence / device-eat-evidence
+
+spdm-evidence = [
+  evidence-type: 1,
+  signed-measurements: bstr,
+  cert-chain: bstr,
+  ? vca: bstr
+]
+
+device-eat-evidence = [
+  evidence-type: 2,
+  token-format: tstr,
+  device-token: bstr
+]
+
+env-id = tstr .size (5..64)
+
+general-uri = tstr
+
+TBD_NATIVE_EVIDENCE = 60000
+TBD_PLATFORM_CORIM_ID = 60001
+</pre><a href="#appendix-B-2" class="pilcrow">¶</a>
+</div>
+<p id="appendix-B-3"><code>general-uri</code> above is the CBOR URI representation from <span>[<a href="#RFC9711" class="cite xref">RFC9711</a>]</span>, reduced to
+its <code>tstr</code> wire type so this stand-alone grammar has no external CDDL imports.<a href="#appendix-B-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-C">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-C-1">The authors thank the design and implementation reviewers whose feedback
+improved the architecture, encoding, and verification procedures described in
+this document. Individual acknowledgments will be added as review continues.<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-D">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Xiling Sun</span></div>
+<div dir="auto" class="left"><span class="org">Microsoft</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:xiling.sun@microsoft.com" class="email">xiling.sun@microsoft.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Raghu Krishnamurthy</span></div>
+<div dir="auto" class="left"><span class="org">NVIDIA</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:raghupathyk@nvidia.com" class="email">raghupathyk@nvidia.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Roksana Golizadeh Mojarad</span></div>
+<div dir="auto" class="left"><span class="org">Microsoft</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:roksanag@microsoft.com" class="email">roksanag@microsoft.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
