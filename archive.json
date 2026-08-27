@@ -1,0 +1,93 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2026-08-27T05:30:33.296933+00:00",
+  "repo": "helloxiling/draft-sun-rats-composite-eat",
+  "labels": [
+    {
+      "name": "accessibility",
+      "description": "Barrier affecting people with disabilities",
+      "color": "f143ab"
+    },
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    },
+    {
+      "name": "technical",
+      "description": "Protocol semantics, wire format, or security",
+      "color": "D73A4A"
+    },
+    {
+      "name": "editorial",
+      "description": "Clarity, structure, terminology, or wording",
+      "color": "0075CA"
+    },
+    {
+      "name": "open-question",
+      "description": "Design decision requiring discussion",
+      "color": "FBCA04"
+    }
+  ],
+  "issues": [
+    {
+      "number": 1,
+      "id": "I_kwDOUEUBpM8AAAABOQRQaQ",
+      "title": "Resolve -00 publication placeholders",
+      "url": "https://github.com/helloxiling/draft-sun-rats-composite-eat/issues/1",
+      "state": "OPEN",
+      "author": "helloxiling",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [
+        "open-question"
+      ],
+      "body": "Track the remaining items before an initial Internet-Draft submission:\n\n- [ ] Choose the final `eat_profile` URI\n- [ ] Confirm IANA request names and temporary claim-key handling\n- [ ] Add a complete cryptographic worked example\n- [ ] Complete acknowledgments\n- [ ] Confirm the public GitHub location before changing repository visibility\n\nSubstantive protocol decisions should also be summarized on the RATS mailing list.",
+      "createdAt": "2026-08-25T23:05:20Z",
+      "updatedAt": "2026-08-25T23:05:20Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
+  "pulls": []
+}
