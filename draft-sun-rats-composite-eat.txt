@@ -5,10 +5,10 @@
 Remote ATtestation ProcedureS                                     X. Sun
 Internet-Draft                                                 Microsoft
 Intended status: Standards Track                        R. Krishnamurthy
-Expires: 27 February 2027                                         NVIDIA
+Expires: 5 March 2027                                             NVIDIA
                                                     R. Golizadeh Mojarad
                                                                Microsoft
-                                                          26 August 2026
+                                                        1 September 2026
 
 
            An EAT Profile for Composite Platform Attestation
@@ -59,7 +59,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 27 February 2027.
+   This Internet-Draft will expire on 5 March 2027.
 
 Copyright Notice
 
@@ -731,7 +731,7 @@ Table of Contents
 10.1.  Normative References
 
    [DSP0274]  DMTF, "Security Protocol and Data Model (SPDM)
-              Specification", DSP0274 Version 1.3.2, 2023,
+              Specification", DSP0274 Version 1.3.2, 2024,
               <https://www.dmtf.org/dsp/DSP0274>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
